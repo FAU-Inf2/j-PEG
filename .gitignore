@@ -1,2 +1,9 @@
 .*.swp
 .*.swo
+
+build/*
+.gradle/*
+
+tmp/*
+
+.idea/
