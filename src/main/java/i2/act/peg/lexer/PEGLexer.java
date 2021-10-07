@@ -129,6 +129,12 @@ public final class PEGLexer implements Lexer<PEGTokenKind, PEGToken>, Iterable<P
         case ']': {
           return new PEGToken(PEGTokenKind.TK_RBRACK, begin);
         }
+        case '<': {
+          return new PEGToken(PEGTokenKind.TK_LANGLE, begin);
+        }
+        case '>': {
+          return new PEGToken(PEGTokenKind.TK_RANGLE, begin);
+        }
         case '^': {
           return new PEGToken(PEGTokenKind.TK_NEGATE, begin);
         }

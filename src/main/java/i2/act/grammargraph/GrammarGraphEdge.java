@@ -27,8 +27,16 @@ public abstract class GrammarGraphEdge
   public static final class AlternativeEdge
       extends GrammarGraphEdge<AlternativeNode, SequenceNode> {
 
-    public AlternativeEdge(final AlternativeNode source, final SequenceNode target) {
+    private final int weight;
+
+    public AlternativeEdge(final AlternativeNode source, final SequenceNode target,
+        final int weight) {
       super(source, target);
+      this.weight = weight;
+    }
+
+    public final int getWeight() {
+      return this.weight;
     }
 
   }

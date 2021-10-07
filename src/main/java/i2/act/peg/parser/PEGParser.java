@@ -136,21 +136,49 @@ public final class PEGParser {
   }
 
   private static final Alternatives parseAlternatives(final PEGLexer lexer) {
-    // alternatives: sequence ( OR sequence )* ;
+    // alternatives: weight_specifier sequence ( OR weight_specifier sequence )* ;
 
     final Alternatives alternatives = new Alternatives(lexer.getPosition());
 
-    final Sequence firstAlternative = parseSequence(lexer);
-    alternatives.addAlternative(firstAlternative);
+    // first alternative
+    {
+      final int weight = parseWeightSpecifier(lexer);
+
+      final Sequence firstAlternative = parseSequence(lexer);
+      firstAlternative.setWeight(weight);
+
+      alternatives.addAlternative(firstAlternative);
+    }
 
     while (lexer.peek().kind == PEGTokenKind.TK_OR) {
       lexer.assertPop(PEGTokenKind.TK_OR);
 
+      final int weight = parseWeightSpecifier(lexer);
+
       final Sequence nextAlternative = parseSequence(lexer);
+      nextAlternative.setWeight(weight);
+
       alternatives.addAlternative(nextAlternative);
     }
 
     return alternatives;
+  }
+
+  private static final int parseWeightSpecifier(final PEGLexer lexer) {
+    // weight_specifier: ( LANGLE INT RANGLE )?
+
+    if (lexer.peek().kind == PEGTokenKind.TK_LANGLE) {
+      lexer.assertPop(PEGTokenKind.TK_LANGLE);
+
+      final PEGToken token = lexer.assertPop(PEGTokenKind.TK_INT);
+      final int value = Integer.parseInt(token.string);
+
+      lexer.assertPop(PEGTokenKind.TK_RANGLE);
+
+      return value;
+    } else {
+      return 1;
+    }
   }
 
   private static final Sequence parseSequence(final PEGLexer lexer) {
@@ -183,7 +211,7 @@ public final class PEGParser {
         atom = parseProductionName(lexer);
       } else {
         lexer.assertPop(PEGTokenKind.TK_LPAREN);
-      
+
         atom = parseAlternatives(lexer);
 
         lexer.assertPop(PEGTokenKind.TK_RPAREN);

@@ -96,7 +96,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
     final boolean dashed = (edge instanceof AlternativeEdge);
     final String label = (edge instanceof SequenceEdge)
         ? (((SequenceEdge) edge).getQuantifier().stringRepresentation)
-        : "";
+        : String.valueOf(((AlternativeEdge) edge).getWeight());
 
     writer.write("    %s -> %s [label=\"%s\",%s];\n", nodeNameFrom, nodeNameTo, label,
         (dashed ? "style=dashed" : ""));
@@ -265,7 +265,10 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
                   assert (successorNode instanceof SequenceNode);
                   final SequenceNode sequenceNode = (SequenceNode) successorNode;
 
-                  final AlternativeEdge edge = new AlternativeEdge(alternativeNode, sequenceNode);
+                  final int weight = alternative.getWeight();
+
+                  final AlternativeEdge edge =
+                      new AlternativeEdge(alternativeNode, sequenceNode, weight);
                   alternativeNode.successorEdges.add(edge);
                   sequenceNode.predecessorEdges.add(edge);
                 }
@@ -320,7 +323,10 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
           assert (_sequenceNode instanceof SequenceNode);
           final SequenceNode sequenceNode = (SequenceNode) _sequenceNode;
 
-          final AlternativeEdge edge = new AlternativeEdge(productionNode, sequenceNode);
+          final int weight = sequence.getWeight();
+
+          final AlternativeEdge edge =
+              new AlternativeEdge(productionNode, sequenceNode, weight);
           productionNode.successorEdges.add(edge);
           sequenceNode.predecessorEdges.add(edge);
         }

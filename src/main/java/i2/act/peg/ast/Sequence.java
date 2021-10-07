@@ -13,6 +13,8 @@ public final class Sequence extends Expression implements Iterable<Atom>, Gramma
 
   private final List<Atom> elements;
 
+  private int weight = 1;
+
   public Sequence(final SourcePosition position) {
     this(position, new ArrayList<Atom>());
   }
@@ -36,6 +38,14 @@ public final class Sequence extends Expression implements Iterable<Atom>, Gramma
 
   public final int getNumberOfElements() {
     return this.elements.size();
+  }
+
+  public final int getWeight() {
+    return this.weight;
+  }
+
+  public final void setWeight(final int weight) {
+    this.weight = weight;
   }
 
   @Override

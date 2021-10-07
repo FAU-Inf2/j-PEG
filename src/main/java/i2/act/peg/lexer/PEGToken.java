@@ -13,6 +13,8 @@ public final class PEGToken implements Token<PEGToken.PEGTokenKind> {
     TK_RPAREN(")"),
     TK_LBRACK("["),
     TK_RBRACK("]"),
+    TK_LANGLE("<"),
+    TK_RANGLE(">"),
     TK_NEGATE("^"),
     TK_OPTIONAL("?"),
     TK_STAR("*"),
