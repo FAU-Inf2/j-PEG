@@ -282,6 +282,12 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
               @Override
               public GrammarGraphNode<?, ?> visit(final Alternatives alternatives,
                   final Void parameter) {
+                final Atom skippableTo = skippableTo(alternatives);
+
+                if (skippableTo != null) {
+                  return skippableTo.accept(this, parameter);
+                }
+
                 final AlternativeNode alternativeNode =
                     new AlternativeNode(alternatives.getImplicitQuantifierSymbol());
                 grammarGraph.allNodes.add(alternativeNode);
@@ -327,6 +333,26 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
                 }
 
                 return sequenceNode;
+              }
+
+              private final Atom skippableTo(final Alternatives alternatives) {
+                if (alternatives.getNumberOfAlternatives() != 1) {
+                  return null;
+                }
+
+                final Sequence onlyAlternative = alternatives.getAlternative(0);
+
+                if (onlyAlternative.getNumberOfElements() != 1) {
+                  return null;
+                }
+
+                final Atom onlyElement = onlyAlternative.getElement(0);
+
+                if (onlyElement.hasQuantifier()) {
+                  return null;
+                }
+
+                return onlyElement;
               }
 
               private final SequenceEdge.Quantifier getQuantifier(final Quantifier quantifier) {
