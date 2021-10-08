@@ -101,21 +101,32 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
   }
 
   private final String getEdgeLabel(final GrammarGraphEdge<?, ?> edge) {
-    // TODO do not include weights of 1?
     if (edge instanceof SequenceEdge) {
       final SequenceEdge sequenceEdge = (SequenceEdge) edge;
 
       if (sequenceEdge.getQuantifier() == SequenceEdge.Quantifier.QUANT_NONE) {
         return "";
       } else {
-        return String.format("%d%s",
-            sequenceEdge.getWeight(), sequenceEdge.getQuantifier().stringRepresentation);
+        final int weight = sequenceEdge.getWeight();
+
+        if (weight == 1) {
+          return sequenceEdge.getQuantifier().stringRepresentation;
+        } else {
+          return String.format("%d%s",
+              sequenceEdge.getWeight(), sequenceEdge.getQuantifier().stringRepresentation);
+        }
       }
     } else {
       assert (edge instanceof AlternativeEdge);
       final AlternativeEdge alternativeEdge = (AlternativeEdge) edge;
 
-      return String.valueOf(alternativeEdge.getWeight());
+      final int weight = alternativeEdge.getWeight();
+
+      if (weight == 1) {
+        return "";
+      } else {
+        return String.valueOf(weight);
+      }
     }
   }
 
