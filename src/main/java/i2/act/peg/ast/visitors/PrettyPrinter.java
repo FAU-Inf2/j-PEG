@@ -177,6 +177,10 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
         writer.write(" ");
       }
 
+      if (sequence.getWeight() != 1) {
+        writer.write("<%d> ", sequence.getWeight());
+      }
+
       final boolean oldTopLevelAlternatives = this.topLevelAlternatives;
       this.topLevelAlternatives = false;
 
