@@ -94,7 +94,7 @@ public final class RemoveDuplicateProductions implements GrammarTransformation {
           }
 
           final Alternatives transformedAlternatives = new Alternatives(
-              SourcePosition.UNKNOWN, Atom.Quantifier.QUANT_NONE, transformedSequences);
+              SourcePosition.UNKNOWN, null, transformedSequences);
 
           return transformedAlternatives;
         }

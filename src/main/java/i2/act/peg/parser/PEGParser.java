@@ -1,6 +1,7 @@
 package i2.act.peg.parser;
 
 import i2.act.peg.ast.*;
+import i2.act.peg.info.SourcePosition;
 import i2.act.peg.lexer.PEGLexer;
 import i2.act.peg.lexer.PEGToken;
 import i2.act.peg.lexer.PEGToken.PEGTokenKind;
@@ -198,7 +199,7 @@ public final class PEGParser {
   }
 
   private static final Atom parseAtom(final PEGLexer lexer) {
-    // atom: ( production_name | LPAREN alternatives RPAREN ) quantifier? ;
+    // atom: ( production_name | LPAREN alternatives RPAREN ) optional_quantifier ;
 
     lexer.assertPeek(PEGTokenKind.TK_PARSER_ID, PEGTokenKind.TK_LEXER_ID,
         PEGTokenKind.TK_LPAREN);
@@ -218,18 +219,7 @@ public final class PEGParser {
       }
     }
 
-    final Atom.Quantifier quantifier;
-    {
-      final PEGTokenKind peekKind = lexer.peek().kind;
-
-      if (peekKind == PEGTokenKind.TK_OPTIONAL || peekKind == PEGTokenKind.TK_STAR
-          || peekKind == PEGTokenKind.TK_PLUS) {
-        quantifier = parseQuantifier(lexer);
-      } else {
-        quantifier = Atom.Quantifier.QUANT_NONE;
-      }
-    }
-
+    final Quantifier quantifier = parseOptionalQuantifier(lexer);
     atom.setQuantifier(quantifier);
 
     return atom;
@@ -250,8 +240,25 @@ public final class PEGParser {
     }
   }
 
-  private static final Atom.Quantifier parseQuantifier(final PEGLexer lexer) {
-    // quantifier: OPTIONAL | STAR | PLUS ;
+  private static final Quantifier parseOptionalQuantifier(final PEGLexer lexer) {
+    // optional_quantifier: ( quantifier )? ;
+
+    final PEGTokenKind peekKind = lexer.peek().kind;
+
+    if (peekKind == PEGTokenKind.TK_OPTIONAL || peekKind == PEGTokenKind.TK_STAR
+        || peekKind == PEGTokenKind.TK_PLUS || peekKind == PEGTokenKind.TK_LANGLE) {
+      return parseQuantifier(lexer);
+    } else {
+      return null;
+    }
+  }
+
+  private static final Quantifier parseQuantifier(final PEGLexer lexer) {
+    // quantifier: weight_specifier ( OPTIONAL | STAR | PLUS );
+
+    final SourcePosition position = lexer.getPosition();
+
+    final int weight = parseWeightSpecifier(lexer);
 
     lexer.assertPeek(PEGTokenKind.TK_OPTIONAL, PEGTokenKind.TK_STAR, PEGTokenKind.TK_PLUS);
 
@@ -259,14 +266,14 @@ public final class PEGParser {
 
     switch (popKind) {
       case TK_OPTIONAL: {
-        return Atom.Quantifier.QUANT_OPTIONAL;
+        return new Quantifier(position, Quantifier.Kind.QUANT_OPTIONAL, weight);
       }
       case TK_STAR: {
-        return Atom.Quantifier.QUANT_STAR;
+        return new Quantifier(position, Quantifier.Kind.QUANT_STAR, weight);
       }
       default: {
         assert (popKind == PEGTokenKind.TK_PLUS);
-        return Atom.Quantifier.QUANT_PLUS;
+        return new Quantifier(position, Quantifier.Kind.QUANT_PLUS, weight);
       }
     }
   }
@@ -337,7 +344,7 @@ public final class PEGParser {
   }
 
   private static final Atom parseREAtom(final PEGLexer lexer) {
-    // re_atom: ( LPAREN re_alternatives RPAREN | re_group | re_literal ) quantifier? ;
+    // re_atom: ( LPAREN re_alternatives RPAREN | re_group | re_literal ) optional_quantifier ;
 
     lexer.assertPeek(PEGTokenKind.TK_LPAREN, PEGTokenKind.TK_LBRACK, PEGTokenKind.TK_LITERAL);
 
@@ -358,18 +365,7 @@ public final class PEGParser {
       }
     }
 
-    final Atom.Quantifier quantifier;
-    {
-      final PEGTokenKind peekKind = lexer.peek().kind;
-
-      if (peekKind == PEGTokenKind.TK_OPTIONAL || peekKind == PEGTokenKind.TK_STAR
-          || peekKind == PEGTokenKind.TK_PLUS) {
-        quantifier = parseQuantifier(lexer);
-      } else {
-        quantifier = Atom.Quantifier.QUANT_NONE;
-      }
-    }
-
+    final Quantifier quantifier = parseOptionalQuantifier(lexer);
     atom.setQuantifier(quantifier);
 
     return atom;

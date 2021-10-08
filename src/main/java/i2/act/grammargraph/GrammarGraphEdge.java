@@ -60,15 +60,21 @@ public abstract class GrammarGraphEdge
     }
 
     private final Quantifier quantifier;
+    private final int weight;
 
     public SequenceEdge(final SequenceNode source, final AlternativeNode target,
-        final Quantifier quantifier) {
+        final Quantifier quantifier, final int weight) {
       super(source, target);
       this.quantifier = quantifier;
+      this.weight = weight;
     }
 
     public final Quantifier getQuantifier() {
       return this.quantifier;
+    }
+
+    public final int getWeight() {
+      return this.weight;
     }
 
   }

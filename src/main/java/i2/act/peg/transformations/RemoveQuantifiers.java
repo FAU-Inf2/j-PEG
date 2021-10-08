@@ -93,8 +93,8 @@ public final class RemoveQuantifiers implements GrammarTransformation {
           }
         }
 
-        final Alternatives transformedAlternatives = new Alternatives(
-            SourcePosition.UNKNOWN, Atom.Quantifier.QUANT_NONE, transformedSequences);
+        final Alternatives transformedAlternatives =
+            new Alternatives(SourcePosition.UNKNOWN, null, transformedSequences);
 
         if (alternatives.hasQuantifier()) {
           assert (this.currentProductionName != null);
@@ -102,7 +102,9 @@ public final class RemoveQuantifiers implements GrammarTransformation {
           final String productionName;
           final String productionText;
 
-          switch (alternatives.getQuantifier()) {
+          final Quantifier.Kind quantifierKind = alternatives.getQuantifier().getKind();
+
+          switch (quantifierKind) {
             case QUANT_OPTIONAL: {
               productionName = String.format("h_%s_qf_%d",
                   this.currentProductionName, this.currentProductionCounter++);
@@ -133,7 +135,7 @@ public final class RemoveQuantifiers implements GrammarTransformation {
               break;
             }
             default: {
-              assert (false) : "unknown quantifier: " + alternatives.getQuantifier();
+              assert (false) : "unknown quantifier: " + quantifierKind;
               return transformedAlternatives;
             }
           }
@@ -184,7 +186,9 @@ public final class RemoveQuantifiers implements GrammarTransformation {
         final String transformedName;
         final String productionText;
 
-        switch (originalIdentifier.getQuantifier()) {
+        final Quantifier.Kind quantifierKind = originalIdentifier.getQuantifier().getKind();
+
+        switch (quantifierKind) {
           case QUANT_OPTIONAL: {
             lookupSet = this.optional;
 
@@ -228,7 +232,7 @@ public final class RemoveQuantifiers implements GrammarTransformation {
             break;
           }
           default: {
-            assert (false) : "unknown quantifier: " + originalIdentifier.getQuantifier();
+            assert (false) : "unknown quantifier: " + quantifierKind;
             return null;
           }
         }

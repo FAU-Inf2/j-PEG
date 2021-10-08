@@ -94,12 +94,29 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
     final String nodeNameTo = getNodeName(edge.getTarget());
 
     final boolean dashed = (edge instanceof AlternativeEdge);
-    final String label = (edge instanceof SequenceEdge)
-        ? (((SequenceEdge) edge).getQuantifier().stringRepresentation)
-        : String.valueOf(((AlternativeEdge) edge).getWeight());
+    final String label = getEdgeLabel(edge);
 
     writer.write("    %s -> %s [label=\"%s\",%s];\n", nodeNameFrom, nodeNameTo, label,
         (dashed ? "style=dashed" : ""));
+  }
+
+  private final String getEdgeLabel(final GrammarGraphEdge<?, ?> edge) {
+    // TODO do not include weights of 1?
+    if (edge instanceof SequenceEdge) {
+      final SequenceEdge sequenceEdge = (SequenceEdge) edge;
+
+      if (sequenceEdge.getQuantifier() == SequenceEdge.Quantifier.QUANT_NONE) {
+        return "";
+      } else {
+        return String.format("%d%s",
+            sequenceEdge.getWeight(), sequenceEdge.getQuantifier().stringRepresentation);
+      }
+    } else {
+      assert (edge instanceof AlternativeEdge);
+      final AlternativeEdge alternativeEdge = (AlternativeEdge) edge;
+
+      return String.valueOf(alternativeEdge.getWeight());
+    }
   }
 
   public final void printAsDot() {
@@ -289,8 +306,10 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
                   final AlternativeNode alternativeNode = (AlternativeNode) successorNode;
 
                   final SequenceEdge.Quantifier quantifier = getQuantifier(element.getQuantifier());
+                  final int weight = getWeight(element.getQuantifier());
+
                   final SequenceEdge edge =
-                      new SequenceEdge(sequenceNode, alternativeNode, quantifier);
+                      new SequenceEdge(sequenceNode, alternativeNode, quantifier, weight);
 
                   sequenceNode.successorEdges.add(edge);
                   alternativeNode.predecessorEdges.add(edge);
@@ -299,22 +318,32 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
                 return sequenceNode;
               }
 
-              private final SequenceEdge.Quantifier getQuantifier(
-                  final Atom.Quantifier atomQuantifier) {
-                switch (atomQuantifier) {
+              private final SequenceEdge.Quantifier getQuantifier(final Quantifier quantifier) {
+                if (quantifier == null) {
+                    return SequenceEdge.Quantifier.QUANT_NONE;
+                }
+
+                final Quantifier.Kind quantifierKind = quantifier.getKind();
+
+                switch (quantifierKind) {
                   case QUANT_OPTIONAL: {
                     return SequenceEdge.Quantifier.QUANT_OPTIONAL;
                   }
                   case QUANT_STAR: {
                     return SequenceEdge.Quantifier.QUANT_STAR;
                   }
-                  case QUANT_PLUS: {
+                  default: {
+                    assert (quantifierKind == Quantifier.Kind.QUANT_PLUS);
                     return SequenceEdge.Quantifier.QUANT_PLUS;
                   }
-                  default: {
-                    assert (atomQuantifier == Atom.Quantifier.QUANT_NONE);
-                    return SequenceEdge.Quantifier.QUANT_NONE;
-                  }
+                }
+              }
+
+              private final int getWeight(final Quantifier quantifier) {
+                if (quantifier == null) {
+                  return 1;
+                } else {
+                  return quantifier.getWeight();
                 }
               }
 

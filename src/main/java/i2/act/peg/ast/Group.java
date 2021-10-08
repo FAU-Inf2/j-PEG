@@ -14,11 +14,11 @@ public final class Group extends Atom implements Iterable<Range> {
   private final List<Range> ranges;
 
   public Group(final SourcePosition position, final boolean inverted) {
-    this(position, inverted, new ArrayList<Range>(), Atom.Quantifier.QUANT_NONE);
+    this(position, inverted, new ArrayList<Range>(), null);
   }
 
   private Group(final SourcePosition position, final boolean inverted, final List<Range> ranges, 
-      final Atom.Quantifier quantifier) {
+      final Quantifier quantifier) {
     super(position, quantifier);
     this.inverted = inverted;
     this.ranges = ranges;

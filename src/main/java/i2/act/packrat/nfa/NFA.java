@@ -366,9 +366,8 @@ public final class NFA {
         return applyQuantifier(nfa, literal.getQuantifier());
       }
 
-      private final NFA applyQuantifier(final NFA baseNFA,
-          final Atom.Quantifier quantifier) {
-        if (quantifier == Atom.Quantifier.QUANT_NONE) {
+      private final NFA applyQuantifier(final NFA baseNFA, final Quantifier quantifier) {
+        if (quantifier == null) {
           return baseNFA;
         }
 
@@ -389,7 +388,9 @@ public final class NFA {
         final NFA nfa = new NFA(startState);
         nfa.addAcceptingState(acceptingState);
 
-        switch (quantifier) {
+        final Quantifier.Kind quantifierKind = quantifier.getKind();
+
+        switch (quantifierKind) {
           case QUANT_STAR: {
             acceptingState.addEpsilonTransition(startState);
             startState.addEpsilonTransition(acceptingState);
@@ -404,7 +405,7 @@ public final class NFA {
             break;
           }
           default: {
-            throw new AssertionError("unknown quantifier: " + quantifier);
+            throw new AssertionError("unknown quantifier: " + quantifierKind);
           }
         }
 

@@ -5,25 +5,10 @@ import i2.act.peg.info.SourcePosition;
 
 public abstract class Atom extends Expression implements GrammarBuilderNode {
 
-  public static enum Quantifier {
-
-    QUANT_NONE(""),
-    QUANT_OPTIONAL("?"),
-    QUANT_STAR("*"),
-    QUANT_PLUS("+");
-
-    public final String stringRepresentation;
-
-    private Quantifier(final String stringRepresentation) {
-      this.stringRepresentation = stringRepresentation;
-    }
-
-  }
-
   protected Quantifier quantifier;
 
   public Atom(final SourcePosition position) {
-    this(position, Quantifier.QUANT_NONE);
+    this(position, null);
   }
 
   public Atom(final SourcePosition position, final Quantifier quantifier) {
@@ -32,7 +17,7 @@ public abstract class Atom extends Expression implements GrammarBuilderNode {
   }
 
   public final boolean hasQuantifier() {
-    return this.quantifier != Quantifier.QUANT_NONE;
+    return this.quantifier != null;
   }
 
   public final Quantifier getQuantifier() {

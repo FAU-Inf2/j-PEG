@@ -101,8 +101,7 @@ public final class RemoveEpsilonProductions implements GrammarTransformation {
         }
 
         assert (!alternatives.hasQuantifier());
-        return new Alternatives(
-            SourcePosition.UNKNOWN, Atom.Quantifier.QUANT_NONE, transformedSequences);
+        return new Alternatives(SourcePosition.UNKNOWN, null, transformedSequences);
       }
 
     }, null);

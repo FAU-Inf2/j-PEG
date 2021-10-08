@@ -77,7 +77,7 @@ public final class RemoveUnitProductions implements GrammarTransformation {
         }
 
         return new Alternatives(
-            SourcePosition.UNKNOWN, Atom.Quantifier.QUANT_NONE, transformedSequences);
+            SourcePosition.UNKNOWN, null, transformedSequences);
       }
 
       @Override

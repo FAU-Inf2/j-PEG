@@ -9,8 +9,7 @@ public abstract class Identifier<S extends Symbol<?>> extends Atom {
 
   protected S symbol;
 
-  public Identifier(final SourcePosition position, final String name,
-      final Atom.Quantifier quantifier) {
+  public Identifier(final SourcePosition position, final String name, final Quantifier quantifier) {
     super(position, quantifier);
     this.name = name;
   }

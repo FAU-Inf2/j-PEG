@@ -78,8 +78,7 @@ public final class RemoveChainProductions implements GrammarTransformation {
           }
         }
 
-        return new Alternatives(
-            SourcePosition.UNKNOWN, Atom.Quantifier.QUANT_NONE, transformedSequences);
+        return new Alternatives(SourcePosition.UNKNOWN, null, transformedSequences);
       }
 
       @Override

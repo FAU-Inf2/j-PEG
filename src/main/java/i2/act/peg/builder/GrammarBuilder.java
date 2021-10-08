@@ -118,7 +118,7 @@ public final class GrammarBuilder {
   // ===============================================================================================
 
   private static final Atom quantified(final GrammarBuilderNode node,
-      final Atom.Quantifier quantifier) {
+      final Quantifier.Kind quantifierKind, final int weight) {
     final Atom atom = toAtom(node);
 
     final Atom result;
@@ -130,21 +130,34 @@ public final class GrammarBuilder {
       }
     }
 
+    final Quantifier quantifier = new Quantifier(SourcePosition.UNKNOWN, quantifierKind, weight);
     result.setQuantifier(quantifier);
 
     return result;
   }
 
   public static final Atom opt(final GrammarBuilderNode node) {
-    return quantified(node, Atom.Quantifier.QUANT_OPTIONAL);
+    return opt(node, 1);
+  }
+
+  public static final Atom opt(final GrammarBuilderNode node, final int weight) {
+    return quantified(node, Quantifier.Kind.QUANT_OPTIONAL, weight);
   }
 
   public static final Atom many(final GrammarBuilderNode node) {
-    return quantified(node, Atom.Quantifier.QUANT_STAR);
+    return many(node, 1);
+  }
+
+  public static final Atom many(final GrammarBuilderNode node, final int weight) {
+    return quantified(node, Quantifier.Kind.QUANT_STAR, weight);
   }
 
   public static final Atom manyOne(final GrammarBuilderNode node) {
-    return quantified(node, Atom.Quantifier.QUANT_PLUS);
+    return manyOne(node, 1);
+  }
+
+  public static final Atom manyOne(final GrammarBuilderNode node, final int weight) {
+    return quantified(node, Quantifier.Kind.QUANT_PLUS, weight);
   }
 
   // ===============================================================================================

@@ -72,12 +72,24 @@ public abstract class BaseASTVisitor<P, R> implements ASTVisitor<P, R> {
   @Override
   public R visit(final ParserIdentifier identifier, final P param) {
     prolog(identifier, param);
+
+    if (identifier.hasQuantifier()) {
+      final Quantifier quantifier = identifier.getQuantifier();
+      visitChild(identifier, quantifier, param);
+    }
+
     return epilog(identifier, param);
   }
 
   @Override
   public R visit(final LexerIdentifier identifier, final P param) {
     prolog(identifier, param);
+
+    if (identifier.hasQuantifier()) {
+      final Quantifier quantifier = identifier.getQuantifier();
+      visitChild(identifier, quantifier, param);
+    }
+
     return epilog(identifier, param);
   }
 
@@ -87,6 +99,11 @@ public abstract class BaseASTVisitor<P, R> implements ASTVisitor<P, R> {
 
     for (final Sequence alternative : alternatives.getAlternatives()) {
       visitChild(alternatives, alternative, param);
+    }
+
+    if (alternatives.hasQuantifier()) {
+      final Quantifier quantifier = alternatives.getQuantifier();
+      visitChild(alternatives, quantifier, param);
     }
 
     return epilog(alternatives, param);
@@ -121,6 +138,11 @@ public abstract class BaseASTVisitor<P, R> implements ASTVisitor<P, R> {
       visitChild(group, range, param);
     }
 
+    if (group.hasQuantifier()) {
+      final Quantifier quantifier = group.getQuantifier();
+      visitChild(group, quantifier, param);
+    }
+
     return epilog(group, param);
   }
 
@@ -147,6 +169,12 @@ public abstract class BaseASTVisitor<P, R> implements ASTVisitor<P, R> {
   public R visit(final Literal literal, final P param) {
     prolog(literal, param);
     return epilog(literal, param);
+  }
+
+  @Override
+  public R visit(final Quantifier quantifier, final P param) {
+    prolog(quantifier, param);
+    return epilog(quantifier, param);
   }
 
   @Override

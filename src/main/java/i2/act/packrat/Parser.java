@@ -873,21 +873,24 @@ public abstract class Parser {
 
       private int quantifiedSymbolCounter = 0;
 
-      private final Parser applyQuantifier(final Parser parser, final Atom.Quantifier quantifier,
+      private final Parser applyQuantifier(final Parser parser, final Quantifier quantifier,
           final Symbol<?> quantifiedSymbol) {
-        switch (quantifier) {
+        if (quantifier == null) {
+          return parser;
+        }
+
+        final Quantifier.Kind quantifierKind = quantifier.getKind();
+
+        switch (quantifierKind) {
           case QUANT_OPTIONAL: {
             return optional(parser, quantifierNodes, quantifiedSymbol);
           }
           case QUANT_STAR: {
             return many(parser, quantifierNodes, quantifiedSymbol);
           }
-          case QUANT_PLUS: {
-            return manyOne(parser, quantifierNodes, quantifiedSymbol);
-          }
           default: {
-            assert (quantifier == Atom.Quantifier.QUANT_NONE);
-            return parser;
+            assert (quantifierKind == Quantifier.Kind.QUANT_PLUS);
+            return manyOne(parser, quantifierNodes, quantifiedSymbol);
           }
         }
       }

@@ -7,11 +7,11 @@ import i2.act.peg.symbols.ParserSymbol;
 public final class ParserIdentifier extends Identifier<ParserSymbol> {
 
   public ParserIdentifier(final SourcePosition position, final String name) {
-    this(position, name, Atom.Quantifier.QUANT_NONE);
+    this(position, name, null);
   }
 
   public ParserIdentifier(final SourcePosition position, final String name,
-      final Atom.Quantifier quantifier) {
+      final Quantifier quantifier) {
     super(position, name, quantifier);
   }
 

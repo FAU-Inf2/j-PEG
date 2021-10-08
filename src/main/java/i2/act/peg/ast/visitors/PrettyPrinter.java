@@ -72,7 +72,7 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
     this.topLevelAlternatives = oldTopLevelAlternatives;
 
     writer.write("  ;\n");
-    
+
     return null;
   }
 
@@ -93,7 +93,7 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
 
     final RegularExpression regularExpression = lexerProduction.getRegularExpression();
     regularExpression.accept(this, writer);
-    
+
     writer.write(" ;\n");
 
     this.lexerProduction = false;
@@ -104,7 +104,11 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
   @Override
   public final Void visit(final ParserIdentifier identifier, final SafeWriter writer) {
     final String name = identifier.getName();
-    writer.write(name).write(identifier.getQuantifier().stringRepresentation);
+    writer.write(name);
+
+    if (identifier.hasQuantifier()) {
+      identifier.getQuantifier().accept(this, writer);
+    }
 
     return null;
   }
@@ -112,7 +116,11 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
   @Override
   public final Void visit(final LexerIdentifier identifier, final SafeWriter writer) {
     final String name = identifier.getName();
-    writer.write(name).write(identifier.getQuantifier().stringRepresentation);
+    writer.write(name);
+
+    if (identifier.hasQuantifier()) {
+      identifier.getQuantifier().accept(this, writer);
+    }
 
     return null;
   }
@@ -151,7 +159,10 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
     }
 
     assert (!this.topLevelAlternatives || !alternatives.hasQuantifier());
-    writer.write(alternatives.getQuantifier().stringRepresentation);
+
+    if (alternatives.hasQuantifier()) {
+      alternatives.getQuantifier().accept(this, writer);
+    }
 
     return null;
   }
@@ -204,7 +215,9 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
 
     writer.write("]");
 
-    writer.write(group.getQuantifier().stringRepresentation);
+    if (group.hasQuantifier()) {
+      group.getQuantifier().accept(this, writer);
+    }
 
     return null;
   }
@@ -231,7 +244,21 @@ public final class PrettyPrinter extends BaseASTVisitor<SafeWriter, Void> {
   @Override
   public final Void visit(final Literal literal, final SafeWriter writer) {
     writer.write("'%s'", literal.getEscapedValue());
-    writer.write(literal.getQuantifier().stringRepresentation);
+
+    if (literal.hasQuantifier()) {
+      literal.getQuantifier().accept(this, writer);
+    }
+
+    return null;
+  }
+
+  @Override
+  public final Void visit(final Quantifier quantifier, final SafeWriter writer) {
+    if (quantifier.getWeight() != 1) {
+      writer.write("<%d>", quantifier.getWeight());
+    }
+
+    writer.write(quantifier.getKind().stringRepresentation);
 
     return null;
   }

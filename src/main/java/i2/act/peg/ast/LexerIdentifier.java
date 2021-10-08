@@ -7,11 +7,11 @@ import i2.act.peg.symbols.LexerSymbol;
 public final class LexerIdentifier extends Identifier<LexerSymbol> {
 
   public LexerIdentifier(final SourcePosition position, final String name) {
-    this(position, name, Atom.Quantifier.QUANT_NONE);
+    this(position, name, null);
   }
 
   public LexerIdentifier(final SourcePosition position, final String name,
-      final Atom.Quantifier quantifier) {
+      final Quantifier quantifier) {
     super(position, name, quantifier);
   }
 

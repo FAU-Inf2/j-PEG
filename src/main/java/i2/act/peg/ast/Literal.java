@@ -4,15 +4,14 @@ import i2.act.peg.ast.visitors.ASTVisitor;
 import i2.act.peg.info.SourcePosition;
 
 public final class Literal extends Atom {
-  
+
   private final String value;
 
   public Literal(final SourcePosition position, final String value) {
-    this(position, value, Atom.Quantifier.QUANT_NONE);
+    this(position, value, null);
   }
 
-  public Literal(final SourcePosition position, final String value,
-      final Atom.Quantifier quantifier) {
+  public Literal(final SourcePosition position, final String value, final Quantifier quantifier) {
     super(position, quantifier);
     this.value = value;
   }

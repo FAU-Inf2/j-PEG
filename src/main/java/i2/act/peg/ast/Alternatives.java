@@ -16,19 +16,19 @@ public final class Alternatives extends Atom implements Iterable<Sequence> {
   private ParserSymbol implicitQuantifierSymbol;
 
   public Alternatives(final SourcePosition position) {
-    this(position, Atom.Quantifier.QUANT_NONE);
+    this(position, null);
   }
 
-  public Alternatives(final SourcePosition position, final Atom.Quantifier quantifier) {
+  public Alternatives(final SourcePosition position, final Quantifier quantifier) {
     this(position, quantifier, new ArrayList<Sequence>());
   }
 
-  public Alternatives(final SourcePosition position, final Atom.Quantifier quantifier,
+  public Alternatives(final SourcePosition position, final Quantifier quantifier,
       final List<Sequence> alternatives) {
     this(position, quantifier, alternatives, null);
   }
 
-  public Alternatives(final SourcePosition position, final Atom.Quantifier quantifier,
+  public Alternatives(final SourcePosition position, final Quantifier quantifier,
       final List<Sequence> alternatives, final ParserSymbol implicitQuantifierSymbol) {
     super(position, quantifier);
     this.alternatives = alternatives;

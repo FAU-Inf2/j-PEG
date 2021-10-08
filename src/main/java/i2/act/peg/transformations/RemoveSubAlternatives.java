@@ -84,7 +84,7 @@ public final class RemoveSubAlternatives implements GrammarTransformation {
         }
 
         final Alternatives transformedAlternatives = new Alternatives(
-            SourcePosition.UNKNOWN, Atom.Quantifier.QUANT_NONE, transformedSequences);
+            SourcePosition.UNKNOWN, null, transformedSequences);
 
         if (topLevelAlternative) {
           return transformedAlternatives;

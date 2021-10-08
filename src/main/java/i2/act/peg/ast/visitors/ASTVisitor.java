@@ -28,6 +28,8 @@ public interface ASTVisitor<P, R> {
 
   public R visit(final Literal literal, final P param);
 
+  public R visit(final Quantifier quantifier, final P param);
+
   public R visit(final Annotation annotation, final P param);
 
   public R visit(final IntArgument intArgument, final P param);
