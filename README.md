@@ -174,6 +174,22 @@ It is possible to annotate the rules for terminals and non-terminals in a PEG wi
 Nodes in the syntax tree (see below) that belong to such an annotated definition carry these
 annotations (and their optional values) for further processing.
 
+### Weighted Alternatives and Quantifiers
+
+Some applications might require a way to specify weights for alternatives and quantifiers. Thus,
+these constructs can be annotated as follows:
+
+    foo
+      : <13> ...
+      |  <3> ...
+      ;
+
+    bar
+      : ( foo ) <3>*
+      ;
+
+It is up to the application to decide whether and how to use these weights.
+
 
 ## Constructing a PEG at Runtime
 
