@@ -2,7 +2,6 @@ package i2.act.packrat.nfa;
 
 import i2.act.peg.ast.*;
 import i2.act.peg.ast.visitors.BaseASTVisitor;
-import i2.act.peg.ast.visitors.PrettyPrinter;
 import i2.act.util.SafeWriter;
 
 import java.util.*;
@@ -310,24 +309,8 @@ public final class NFA {
 
         final NFAState acceptingState = new NFAState();
 
-        startState.addTransition(Transition.characterTransition(new CharacterSet() {
-
-            @Override
-            public final boolean matches(final char inputCharacter) {
-              for (final Range range : group) {
-                if (range.inRange(inputCharacter)) {
-                  return !group.isInverted();
-                }
-              }
-              return group.isInverted();
-            }
-
-            @Override
-            public final String toString() {
-              return PrettyPrinter.prettyPrint(group);
-            }
-
-        }, acceptingState));
+        startState.addTransition(Transition.characterTransition(
+            new CharacterSet.CharacterGroup(group), acceptingState));
 
         nfa.addAcceptingState(acceptingState);
 
@@ -344,19 +327,8 @@ public final class NFA {
         for (final char character : literal.getValue().toCharArray()) {
           final NFAState nextState = new NFAState();
 
-          acceptingState.addTransition(Transition.characterTransition(new CharacterSet() {
-
-            @Override
-            public final boolean matches(final char inputCharacter) {
-              return character == inputCharacter;
-            }
-
-            @Override
-            public final String toString() {
-              return String.valueOf(character);
-            }
-          
-          }, nextState));
+          acceptingState.addTransition(Transition.characterTransition(
+              new CharacterSet.SingleCharacter(character), nextState));
 
           acceptingState = nextState;
         }
