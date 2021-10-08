@@ -28,10 +28,12 @@ public final class PEGMain {
   private static final String OPTION_INPUT = "--in";
   private static final String OPTION_GRAMMAR = "--grammar";
 
+  private static final String OPTION_PRETTY_PRINT_GRAMMAR = "--prettyPrintGrammar";
+
   private static final String OPTION_OMIT_QUANTIFIERS = "--omitQuantifiers";
   private static final String OPTION_NO_COMPACTIFY = "--noCompactify";
 
-  private static final String OPTION_PRETTY_PRINT = "--prettyPrint";
+  private static final String OPTION_PRETTY_PRINT_IN = "--prettyPrintIn";
   private static final String OPTION_TO_DOT = "--toDot";
   private static final String OPTION_PRINT_GRAMMAR_GRAPH = "--printGG";
 
@@ -46,10 +48,12 @@ public final class PEGMain {
     argumentsParser.addOption(OPTION_INPUT, true, true, "<file name of input program>");
     argumentsParser.addOption(OPTION_GRAMMAR, true, true, "<file name of grammar>");
 
+    argumentsParser.addOption(OPTION_PRETTY_PRINT_GRAMMAR, false);
+
     argumentsParser.addOption(OPTION_OMIT_QUANTIFIERS, false);
     argumentsParser.addOption(OPTION_NO_COMPACTIFY, false);
 
-    argumentsParser.addOption(OPTION_PRETTY_PRINT, false);
+    argumentsParser.addOption(OPTION_PRETTY_PRINT_IN, false);
     argumentsParser.addOption(OPTION_TO_DOT, false);
     argumentsParser.addOption(OPTION_PRINT_GRAMMAR_GRAPH, false);
 
@@ -108,6 +112,10 @@ public final class PEGMain {
 
     final Grammar grammar = readGrammar(fileNameGrammar);
 
+    if (arguments.hasOption(OPTION_PRETTY_PRINT_GRAMMAR)) {
+      i2.act.peg.ast.visitors.PrettyPrinter.prettyPrint(grammar, SafeWriter.openStdOut());
+    }
+
     final Lexer lexer = Lexer.forGrammar(grammar);
     final Parser parser = Parser.fromGrammar(grammar, quantifierNodes);
 
@@ -140,7 +148,7 @@ public final class PEGMain {
         syntaxTree.compactify();
       }
 
-      if (arguments.hasOption(OPTION_PRETTY_PRINT)) {
+      if (arguments.hasOption(OPTION_PRETTY_PRINT_IN)) {
         PrettyPrinter.print(syntaxTree, SafeWriter.openStdOut());
       }
 
