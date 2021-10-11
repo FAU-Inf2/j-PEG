@@ -2,6 +2,8 @@ package i2.act.peg.ast;
 
 import i2.act.peg.ast.visitors.ASTVisitor;
 import i2.act.peg.info.SourcePosition;
+import i2.act.peg.symbols.LexerSymbol;
+import i2.act.peg.symbols.ParserSymbol;
 import i2.act.peg.symbols.Symbol;
 
 import java.util.ArrayList;
@@ -35,6 +37,12 @@ public final class Grammar extends ASTNode implements Iterable<Production> {
     return Collections.unmodifiableList(this.productions);
   }
 
+  public final List<Symbol> getSymbols() {
+    return this.productions.stream()
+        .map(p -> p.getSymbol())
+        .collect(Collectors.toList());
+  }
+
   public final List<ParserProduction> getParserProductions() {
     return this.productions.stream()
         .filter(p -> (p instanceof ParserProduction))
@@ -42,10 +50,24 @@ public final class Grammar extends ASTNode implements Iterable<Production> {
         .collect(Collectors.toList());
   }
 
+  public final List<ParserSymbol> getParserSymbols() {
+    return this.productions.stream()
+        .filter(p -> (p instanceof ParserProduction))
+        .map(p -> ((ParserProduction) p).getSymbol())
+        .collect(Collectors.toList());
+  }
+
   public final List<LexerProduction> getLexerProductions() {
     return this.productions.stream()
         .filter(p -> (p instanceof LexerProduction))
         .map(p -> (LexerProduction) p)
+        .collect(Collectors.toList());
+  }
+
+  public final List<LexerSymbol> getLexerSymbols() {
+    return this.productions.stream()
+        .filter(p -> (p instanceof LexerProduction))
+        .map(p -> ((LexerProduction) p).getSymbol())
         .collect(Collectors.toList());
   }
 
