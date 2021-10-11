@@ -150,6 +150,44 @@ public final class NFA {
     }
   }
 
+  public final boolean isPossiblePrefix(final String input) {
+    return isPossiblePrefix(input.toCharArray());
+  }
+
+  public final boolean isPossiblePrefix(final char[] input) {
+    if (this.literalString != null) {
+      final int literalStringLength = this.literalString.length();
+
+      if (input.length > literalStringLength) {
+        return false;
+      }
+
+      assert (input.length <= literalStringLength);
+
+      for (int index = 0; index < input.length; ++index) {
+        if (input[index] != this.literalString.charAt(index)) {
+          return false;
+        }
+      }
+
+      return true;
+    } else {
+      Set<NFAState> currentStates = new HashSet<>();
+      currentStates.addAll(this.startState.epsilonClosure(this.acceptingStates));
+
+      for (int index = 0; index < input.length; ++index) {
+        final char nextChar = input[index];
+        currentStates = nextStates(currentStates, nextChar);
+
+        if (currentStates.isEmpty()) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+  }
+
   private final boolean containsAcceptingState(final Set<NFAState> states) {
     for (final NFAState state : states) {
       if (this.acceptingStates.contains(state)) {
