@@ -10,6 +10,7 @@ import i2.act.peg.info.SourcePosition;
 import i2.act.peg.symbols.LexerSymbol;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public final class Lexer {
@@ -27,7 +28,7 @@ public final class Lexer {
   }
 
   public static final Lexer forGrammar(final Grammar grammar) {
-    final List<TokenDefinition> tokenDefinitions = new ArrayList<>();
+    final LinkedHashMap<LexerSymbol, TokenDefinition> tokenDefinitions = new LinkedHashMap<>();
 
     for (final Production production : grammar) {
       if (production instanceof LexerProduction) {
@@ -38,7 +39,7 @@ public final class Lexer {
         final NFA nfa = NFA.fromRegularExpression(regularExpression);
 
         final TokenDefinition tokenDefinition = new TokenDefinition(tokenSymbol, nfa);
-        tokenDefinitions.add(tokenDefinition);
+        tokenDefinitions.put(tokenSymbol, tokenDefinition);
       }
     }
 
@@ -49,10 +50,15 @@ public final class Lexer {
   //------------------------------------------------------------------------------------------------
 
 
-  private final List<TokenDefinition> tokenDefinitions;
-  
-  private Lexer(final List<TokenDefinition> tokenDefinitions) {
+  private final LinkedHashMap<LexerSymbol, TokenDefinition> tokenDefinitions;
+
+  private Lexer(final LinkedHashMap<LexerSymbol, TokenDefinition> tokenDefinitions) {
     this.tokenDefinitions = tokenDefinitions;
+  }
+
+  public final NFA getNFA(final LexerSymbol lexerSymbol) {
+    assert (this.tokenDefinitions.containsKey(lexerSymbol));
+    return this.tokenDefinitions.get(lexerSymbol).nfa;
   }
 
   public final TokenStream lex(final String input) {
@@ -80,7 +86,7 @@ public final class Lexer {
       int longestMatch = 0;
       TokenDefinition longestMatchDefinition = null;
 
-      for (final TokenDefinition tokenDefinition : this.tokenDefinitions) {
+      for (final TokenDefinition tokenDefinition : this.tokenDefinitions.values()) {
         final int prefixMatch = tokenDefinition.nfa.prefixMatch(input, index);
 
         if (prefixMatch > longestMatch) {
