@@ -2,11 +2,11 @@ package i2.act.peg.transformations;
 
 import i2.act.grammargraph.GrammarGraph;
 import i2.act.grammargraph.GrammarGraphEdge;
-import i2.act.grammargraph.GrammarGraphEdge.AlternativeEdge;
-import i2.act.grammargraph.GrammarGraphEdge.SequenceEdge;
+import i2.act.grammargraph.GrammarGraphEdge.Alternative;
+import i2.act.grammargraph.GrammarGraphEdge.Element;
 import i2.act.grammargraph.GrammarGraphNode;
-import i2.act.grammargraph.GrammarGraphNode.AlternativeNode;
-import i2.act.grammargraph.GrammarGraphNode.SequenceNode;
+import i2.act.grammargraph.GrammarGraphNode.Choice;
+import i2.act.grammargraph.GrammarGraphNode.Sequence;
 import i2.act.grammargraph.properties.PropertyComputation;
 import i2.act.peg.ast.*;
 import i2.act.peg.ast.visitors.BaseASTVisitor;
@@ -86,15 +86,15 @@ public final class RemoveEpsilonProductions implements GrammarTransformation {
 
       @Override
       public final Alternatives visit(final Alternatives alternatives, final Void parameter) {
-        final List<Sequence> transformedSequences = new ArrayList<>();
+        final List<i2.act.peg.ast.Sequence> transformedSequences = new ArrayList<>();
 
-        final List<Sequence> originalSequences = alternatives.getAlternatives();
+        final List<i2.act.peg.ast.Sequence> originalSequences = alternatives.getAlternatives();
 
-        for (final Sequence originalSequence : originalSequences) {
+        for (final i2.act.peg.ast.Sequence originalSequence : originalSequences) {
           if (originalSequence.getNumberOfElements() == 0) {
             // epsilon production -> skip
           } else {
-            final List<Sequence> variants =
+            final List<i2.act.peg.ast.Sequence> variants =
                 generateVariants(originalSequence, nullableNonTerminals);
             transformedSequences.addAll(variants);
           }
@@ -216,13 +216,13 @@ public final class RemoveEpsilonProductions implements GrammarTransformation {
             PropertyComputation.Direction.BACKWARDS) {
 
         @Override
-        protected final Set<GrammarGraphNode<?, ?>> init(final AlternativeNode node,
+        protected final Set<GrammarGraphNode<?, ?>> init(final Choice node,
             final GrammarGraph grammarGraph) {
           return new HashSet<>();
         }
 
         @Override
-        protected final Set<GrammarGraphNode<?, ?>> init(final SequenceNode node,
+        protected final Set<GrammarGraphNode<?, ?>> init(final Sequence node,
             final GrammarGraph grammarGraph) {
           final Set<GrammarGraphNode<?, ?>> init = new HashSet<>();
 
@@ -234,24 +234,24 @@ public final class RemoveEpsilonProductions implements GrammarTransformation {
         }
 
         @Override
-        protected final Set<GrammarGraphNode<?, ?>> transfer(final AlternativeNode node,
+        protected final Set<GrammarGraphNode<?, ?>> transfer(final Choice node,
             final Set<GrammarGraphNode<?, ?>> in) {
           return in;
         }
 
         @Override
-        protected final Set<GrammarGraphNode<?, ?>> transfer(final SequenceNode node,
+        protected final Set<GrammarGraphNode<?, ?>> transfer(final Sequence node,
             final Set<GrammarGraphNode<?, ?>> in) {
           return in;
         }
 
         @Override
-        protected final Set<GrammarGraphNode<?, ?>> confluence(final AlternativeNode node,
+        protected final Set<GrammarGraphNode<?, ?>> confluence(final Choice node,
             final Iterable<Pair<GrammarGraphEdge<?, ?>, Set<GrammarGraphNode<?, ?>>>> inSets) {
           final Set<GrammarGraphNode<?, ?>> confluence = confluence(inSets);
 
-          for (final AlternativeEdge edge : node.getSuccessorEdges()) {
-            final SequenceNode successor = edge.getTarget();
+          for (final Alternative edge : node.getSuccessorEdges()) {
+            final Sequence successor = edge.getTarget();
 
             if (confluence.contains(successor)) {
               confluence.add(node);
@@ -263,20 +263,20 @@ public final class RemoveEpsilonProductions implements GrammarTransformation {
         }
 
         @Override
-        protected final Set<GrammarGraphNode<?, ?>> confluence(final SequenceNode node,
+        protected final Set<GrammarGraphNode<?, ?>> confluence(final Sequence node,
             final Iterable<Pair<GrammarGraphEdge<?, ?>, Set<GrammarGraphNode<?, ?>>>> inSets) {
           final Set<GrammarGraphNode<?, ?>> confluence = confluence(inSets);
 
           boolean allSuccessorsNullable = true;
           {
-            for (final SequenceEdge edge : node.getSuccessorEdges()) {
-              final AlternativeNode successor = edge.getTarget();
+            for (final Element edge : node.getSuccessorEdges()) {
+              final Choice successor = edge.getTarget();
 
-              final SequenceEdge.Quantifier quantifier = edge.getQuantifier();
+              final Element.Quantifier quantifier = edge.getQuantifier();
 
               if (!confluence.contains(successor)
-                  && quantifier != SequenceEdge.Quantifier.QUANT_OPTIONAL
-                  && quantifier != SequenceEdge.Quantifier.QUANT_STAR) {
+                  && quantifier != Element.Quantifier.QUANT_OPTIONAL
+                  && quantifier != Element.Quantifier.QUANT_STAR) {
                 allSuccessorsNullable = false;
                 break;
               }
@@ -312,9 +312,9 @@ public final class RemoveEpsilonProductions implements GrammarTransformation {
 
       for (final Set<GrammarGraphNode<?, ?>> nullableNodes : nullableNodesResult.values()) {
         for (final GrammarGraphNode<?, ?> nullableNode : nullableNodes) {
-          if (nullableNode instanceof AlternativeNode
-              && ((AlternativeNode) nullableNode).hasGrammarSymbol()) {
-            final Symbol<?> symbol = ((AlternativeNode) nullableNode).getGrammarSymbol();
+          if (nullableNode instanceof Choice
+              && ((Choice) nullableNode).hasGrammarSymbol()) {
+            final Symbol<?> symbol = ((Choice) nullableNode).getGrammarSymbol();
 
             if (symbol instanceof ParserSymbol) {
               nullableNonTerminals.add((ParserSymbol) symbol);
@@ -327,15 +327,17 @@ public final class RemoveEpsilonProductions implements GrammarTransformation {
     return nullableNonTerminals;
   }
 
-  private final List<Sequence> generateVariants(final Sequence originalSequence,
+  private final List<i2.act.peg.ast.Sequence> generateVariants(
+      final i2.act.peg.ast.Sequence originalSequence,
       final Set<ParserSymbol> nullableNonTerminals) {
-    final List<Sequence> sequences = new ArrayList<>();
+    final List<i2.act.peg.ast.Sequence> sequences = new ArrayList<>();
     {
       final List<List<Atom>> variants =
           generateVariants(0, originalSequence.getElements(), nullableNonTerminals);
 
       for (final List<Atom> variant : variants) {
-        final Sequence sequence = new Sequence(SourcePosition.UNKNOWN, variant);
+        final i2.act.peg.ast.Sequence sequence =
+            new i2.act.peg.ast.Sequence(SourcePosition.UNKNOWN, variant);
         sequences.add(sequence);
       }
     }

@@ -1,9 +1,9 @@
 package i2.act.grammargraph;
 
-import i2.act.grammargraph.GrammarGraphEdge.AlternativeEdge;
-import i2.act.grammargraph.GrammarGraphEdge.SequenceEdge;
-import i2.act.grammargraph.GrammarGraphNode.AlternativeNode;
-import i2.act.grammargraph.GrammarGraphNode.SequenceNode;
+import i2.act.grammargraph.GrammarGraphEdge.Alternative;
+import i2.act.grammargraph.GrammarGraphEdge.Element;
+import i2.act.grammargraph.GrammarGraphNode.Choice;
+import i2.act.grammargraph.GrammarGraphNode.Sequence;
 import i2.act.peg.ast.*;
 import i2.act.peg.ast.visitors.BaseASTVisitor;
 import i2.act.peg.symbols.LexerSymbol;
@@ -29,17 +29,17 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
 
   private final Grammar grammar;
 
-  private final AlternativeNode rootNode;
+  private final Choice rootNode;
 
-  private final Map<Symbol<?>, AlternativeNode> grammarNodes;
+  private final Map<Symbol<?>, Choice> grammarNodes;
   private final List<GrammarGraphNode<?, ?>> allNodes;
 
   private GrammarGraph(final Grammar grammar, final Symbol<?> rootSymbol,
-      final AlternativeNode rootNode) {
+      final Choice rootNode) {
     this.grammar = grammar;
     this.rootNode = rootNode;
 
-    this.grammarNodes = new HashMap<Symbol<?>, AlternativeNode>();
+    this.grammarNodes = new HashMap<Symbol<?>, Choice>();
     this.allNodes = new ArrayList<GrammarGraphNode<?, ?>>();
 
     this.grammarNodes.put(rootSymbol, rootNode);
@@ -50,7 +50,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
     return this.grammar;
   }
 
-  public final AlternativeNode getRootNode() {
+  public final Choice getRootNode() {
     return this.rootNode;
   }
 
@@ -67,21 +67,21 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
     final String nodeName = getNodeName(node);
     final String style;
     {
-      if (node instanceof AlternativeNode) {
-        final AlternativeNode alternativeNode = (AlternativeNode) node;
+      if (node instanceof Choice) {
+        final Choice choice = (Choice) node;
 
-        if (alternativeNode.hasGrammarSymbol()) {
-          if (alternativeNode.getGrammarSymbol() instanceof LexerSymbol) {
+        if (choice.hasGrammarSymbol()) {
+          if (choice.getGrammarSymbol() instanceof LexerSymbol) {
             style = DOT_STYLE_ALTERNATIVE_NODES_LEXER;
           } else {
-            assert (alternativeNode.getGrammarSymbol() instanceof ParserSymbol);
+            assert (choice.getGrammarSymbol() instanceof ParserSymbol);
             style = DOT_STYLE_ALTERNATIVE_NODES_PARSER;
           }
         } else {
           style = DOT_STYLE_ALTERNATIVE_NODES_ANON;
         }
       } else {
-        assert (node instanceof SequenceNode);
+        assert (node instanceof Sequence);
         style = DOT_STYLE_SEQUENCE_NODES;
       }
     }
@@ -93,7 +93,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
     final String nodeNameFrom = getNodeName(edge.getSource());
     final String nodeNameTo = getNodeName(edge.getTarget());
 
-    final boolean dashed = (edge instanceof AlternativeEdge);
+    final boolean dashed = (edge instanceof Alternative);
     final String label = getEdgeLabel(edge);
 
     writer.write("    %s -> %s [label=\"%s\",%s];\n", nodeNameFrom, nodeNameTo, label,
@@ -101,26 +101,26 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
   }
 
   private final String getEdgeLabel(final GrammarGraphEdge<?, ?> edge) {
-    if (edge instanceof SequenceEdge) {
-      final SequenceEdge sequenceEdge = (SequenceEdge) edge;
+    if (edge instanceof Element) {
+      final Element element = (Element) edge;
 
-      if (sequenceEdge.getQuantifier() == SequenceEdge.Quantifier.QUANT_NONE) {
+      if (element.getQuantifier() == Element.Quantifier.QUANT_NONE) {
         return "";
       } else {
-        final int weight = sequenceEdge.getWeight();
+        final int weight = element.getWeight();
 
         if (weight == 1) {
-          return sequenceEdge.getQuantifier().stringRepresentation;
+          return element.getQuantifier().stringRepresentation;
         } else {
           return String.format("%d%s",
-              sequenceEdge.getWeight(), sequenceEdge.getQuantifier().stringRepresentation);
+              element.getWeight(), element.getQuantifier().stringRepresentation);
         }
       }
     } else {
-      assert (edge instanceof AlternativeEdge);
-      final AlternativeEdge alternativeEdge = (AlternativeEdge) edge;
+      assert (edge instanceof Alternative);
+      final Alternative alternative = (Alternative) edge;
 
-      final int weight = alternativeEdge.getWeight();
+      final int weight = alternative.getWeight();
 
       if (weight == 1) {
         return "";
@@ -146,8 +146,8 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
       for (final GrammarGraphNode<?, ?> node : this.allNodes) {
         final String label;
         {
-          if ((node instanceof AlternativeNode) && ((AlternativeNode) node).hasGrammarSymbol()) {
-            label = ((AlternativeNode) node).getGrammarSymbol().getName();
+          if ((node instanceof Choice) && ((Choice) node).hasGrammarSymbol()) {
+            label = ((Choice) node).getGrammarSymbol().getName();
           } else {
             label = "";
           }
@@ -178,7 +178,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
   public final List<LexerSymbol> gatherLexerSymbols() {
     final List<LexerSymbol> symbols = new ArrayList<>();
 
-    for (final AlternativeNode grammarNode : this.grammarNodes.values()) {
+    for (final Choice grammarNode : this.grammarNodes.values()) {
       assert (grammarNode.hasGrammarSymbol());
       if (grammarNode.getGrammarSymbol() instanceof LexerSymbol) {
         symbols.add((LexerSymbol) grammarNode.getGrammarSymbol());
@@ -191,7 +191,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
   public final List<ParserSymbol> gatherParserSymbols() {
     final List<ParserSymbol> symbols = new ArrayList<>();
 
-    for (final AlternativeNode grammarNode : this.grammarNodes.values()) {
+    for (final Choice grammarNode : this.grammarNodes.values()) {
       assert (grammarNode.hasGrammarSymbol());
       if (grammarNode.getGrammarSymbol() instanceof ParserSymbol) {
         symbols.add((ParserSymbol) grammarNode.getGrammarSymbol());
@@ -202,7 +202,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
   }
 
   public final Symbol<?> getSymbol(final String name) {
-    for (final AlternativeNode grammarNode : this.grammarNodes.values()) {
+    for (final Choice grammarNode : this.grammarNodes.values()) {
       assert (grammarNode.hasGrammarSymbol());
       final Symbol<?> symbol = grammarNode.getGrammarSymbol();
 
@@ -218,7 +218,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
 
   public static final GrammarGraph fromGrammar(final Grammar grammar) {
     final Symbol<?> rootSymbol = grammar.getRootProduction().getSymbol();
-    final AlternativeNode rootNode = new AlternativeNode(rootSymbol);
+    final Choice rootNode = new Choice(rootSymbol);
 
     final GrammarGraph grammarGraph = new GrammarGraph(grammar, rootSymbol, rootNode);
 
@@ -227,16 +227,16 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
       for (final Production<?, ?> production : grammar.getProductions()) {
         if (production != grammar.getRootProduction()) {
           final Symbol<?> productionSymbol = production.getSymbol();
-          final AlternativeNode alternativeNode = new AlternativeNode(productionSymbol);
+          final Choice choice = new Choice(productionSymbol);
 
-          grammarGraph.grammarNodes.put(productionSymbol, alternativeNode);
-          grammarGraph.allNodes.add(alternativeNode);
+          grammarGraph.grammarNodes.put(productionSymbol, choice);
+          grammarGraph.allNodes.add(choice);
         }
       }
 
       // add node for implicitly defined EOF
       final Symbol<?> eofSymbol = LexerSymbol.EOF;
-      final AlternativeNode eofNode = new AlternativeNode(eofSymbol);
+      final Choice eofNode = new Choice(eofSymbol);
 
       grammarGraph.grammarNodes.put(eofSymbol, eofNode);
       grammarGraph.allNodes.add(eofNode);
@@ -251,14 +251,14 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
 
         final ParserProduction parserProduction = (ParserProduction) production;
 
-        final AlternativeNode productionNode =
+        final Choice productionNode =
             grammarGraph.grammarNodes.get(parserProduction.getSymbol());
         assert (productionNode != null);
 
         final Alternatives alternatives = parserProduction.getRightHandSide();
 
-        for (final Sequence sequence : alternatives.getAlternatives()) {
-          final GrammarGraphNode<?, ?> _sequenceNode = sequence.accept(
+        for (final i2.act.peg.ast.Sequence _sequence : alternatives.getAlternatives()) {
+          final GrammarGraphNode<?, ?> node = _sequence.accept(
               new BaseASTVisitor<Void, GrammarGraphNode<?, ?>>() {
 
               @Override
@@ -288,51 +288,50 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
                   return skippableTo.accept(this, parameter);
                 }
 
-                final AlternativeNode alternativeNode =
-                    new AlternativeNode(alternatives.getImplicitQuantifierSymbol());
-                grammarGraph.allNodes.add(alternativeNode);
+                final Choice choice =
+                    new Choice(alternatives.getImplicitQuantifierSymbol());
+                grammarGraph.allNodes.add(choice);
 
-                for (final Sequence alternative : alternatives.getAlternatives()) {
+                for (final i2.act.peg.ast.Sequence alternative : alternatives.getAlternatives()) {
                   final GrammarGraphNode<?, ?> successorNode =
                       alternative.accept(this, parameter);
 
-                  assert (successorNode instanceof SequenceNode);
-                  final SequenceNode sequenceNode = (SequenceNode) successorNode;
+                  assert (successorNode instanceof Sequence);
+                  final Sequence sequence = (Sequence) successorNode;
 
                   final int weight = alternative.getWeight();
 
-                  final AlternativeEdge edge =
-                      new AlternativeEdge(alternativeNode, sequenceNode, weight);
-                  alternativeNode.successorEdges.add(edge);
-                  sequenceNode.predecessorEdges.add(edge);
+                  final Alternative edge = new Alternative(choice, sequence, weight);
+                  choice.successorEdges.add(edge);
+                  sequence.predecessorEdges.add(edge);
                 }
 
-                return alternativeNode;
+                return choice;
               }
 
               @Override
-              public GrammarGraphNode<?, ?> visit(final Sequence sequence,
+              public GrammarGraphNode<?, ?> visit(final i2.act.peg.ast.Sequence _sequence,
                   final Void parameter) {
-                final SequenceNode sequenceNode = new SequenceNode();
-                grammarGraph.allNodes.add(sequenceNode);
+                final Sequence sequence = new Sequence();
+                grammarGraph.allNodes.add(sequence);
 
-                for (final Atom element : sequence.getElements()) {
+                for (final Atom element : _sequence.getElements()) {
                   final GrammarGraphNode<?, ?> successorNode = element.accept(this, parameter);
 
-                  assert (successorNode instanceof AlternativeNode);
-                  final AlternativeNode alternativeNode = (AlternativeNode) successorNode;
+                  assert (successorNode instanceof Choice);
+                  final Choice choice = (Choice) successorNode;
 
-                  final SequenceEdge.Quantifier quantifier = getQuantifier(element.getQuantifier());
+                  final Element.Quantifier quantifier = getQuantifier(element.getQuantifier());
                   final int weight = getWeight(element.getQuantifier());
 
-                  final SequenceEdge edge =
-                      new SequenceEdge(sequenceNode, alternativeNode, quantifier, weight);
+                  final Element edge =
+                      new Element(sequence, choice, quantifier, weight);
 
-                  sequenceNode.successorEdges.add(edge);
-                  alternativeNode.predecessorEdges.add(edge);
+                  sequence.successorEdges.add(edge);
+                  choice.predecessorEdges.add(edge);
                 }
 
-                return sequenceNode;
+                return sequence;
               }
 
               private final Atom skippableTo(final Alternatives alternatives) {
@@ -340,7 +339,7 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
                   return null;
                 }
 
-                final Sequence onlyAlternative = alternatives.getAlternative(0);
+                final i2.act.peg.ast.Sequence onlyAlternative = alternatives.getAlternative(0);
 
                 if (onlyAlternative.getNumberOfElements() != 1) {
                   return null;
@@ -355,23 +354,23 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
                 return onlyElement;
               }
 
-              private final SequenceEdge.Quantifier getQuantifier(final Quantifier quantifier) {
+              private final Element.Quantifier getQuantifier(final Quantifier quantifier) {
                 if (quantifier == null) {
-                    return SequenceEdge.Quantifier.QUANT_NONE;
+                    return Element.Quantifier.QUANT_NONE;
                 }
 
                 final Quantifier.Kind quantifierKind = quantifier.getKind();
 
                 switch (quantifierKind) {
                   case QUANT_OPTIONAL: {
-                    return SequenceEdge.Quantifier.QUANT_OPTIONAL;
+                    return Element.Quantifier.QUANT_OPTIONAL;
                   }
                   case QUANT_STAR: {
-                    return SequenceEdge.Quantifier.QUANT_STAR;
+                    return Element.Quantifier.QUANT_STAR;
                   }
                   default: {
                     assert (quantifierKind == Quantifier.Kind.QUANT_PLUS);
-                    return SequenceEdge.Quantifier.QUANT_PLUS;
+                    return Element.Quantifier.QUANT_PLUS;
                   }
                 }
               }
@@ -386,15 +385,14 @@ public final class GrammarGraph implements Iterable<GrammarGraphNode<?, ?>> {
 
             }, null);
 
-          assert (_sequenceNode instanceof SequenceNode);
-          final SequenceNode sequenceNode = (SequenceNode) _sequenceNode;
+          assert (node instanceof Sequence);
+          final Sequence sequence = (Sequence) node;
 
-          final int weight = sequence.getWeight();
+          final int weight = _sequence.getWeight();
 
-          final AlternativeEdge edge =
-              new AlternativeEdge(productionNode, sequenceNode, weight);
+          final Alternative edge = new Alternative(productionNode, sequence, weight);
           productionNode.successorEdges.add(edge);
-          sequenceNode.predecessorEdges.add(edge);
+          sequence.predecessorEdges.add(edge);
         }
       }
     }

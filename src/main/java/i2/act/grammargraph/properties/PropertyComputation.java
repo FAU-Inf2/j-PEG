@@ -3,8 +3,8 @@ package i2.act.grammargraph.properties;
 import i2.act.grammargraph.GrammarGraph;
 import i2.act.grammargraph.GrammarGraphEdge;
 import i2.act.grammargraph.GrammarGraphNode;
-import i2.act.grammargraph.GrammarGraphNode.AlternativeNode;
-import i2.act.grammargraph.GrammarGraphNode.SequenceNode;
+import i2.act.grammargraph.GrammarGraphNode.Choice;
+import i2.act.grammargraph.GrammarGraphNode.Sequence;
 import i2.act.peg.symbols.Symbol;
 import i2.act.util.Pair;
 
@@ -24,45 +24,45 @@ public abstract class PropertyComputation<P> {
     this.direction = direction;
   }
 
-  protected abstract P init(final AlternativeNode node, final GrammarGraph grammarGraph);
+  protected abstract P init(final Choice node, final GrammarGraph grammarGraph);
 
-  protected abstract P init(final SequenceNode node, final GrammarGraph grammarGraph);
+  protected abstract P init(final Sequence node, final GrammarGraph grammarGraph);
 
   protected P init(final GrammarGraphNode<?, ?> node, final GrammarGraph grammarGraph) {
-    if (node instanceof AlternativeNode) {
-      return init((AlternativeNode) node, grammarGraph);
+    if (node instanceof Choice) {
+      return init((Choice) node, grammarGraph);
     } else {
-      assert (node instanceof SequenceNode);
-      return init((SequenceNode) node, grammarGraph);
+      assert (node instanceof Sequence);
+      return init((Sequence) node, grammarGraph);
     }
   }
 
-  protected abstract P transfer(final AlternativeNode node, final P in);
+  protected abstract P transfer(final Choice node, final P in);
 
-  protected abstract P transfer(final SequenceNode node, final P in);
+  protected abstract P transfer(final Sequence node, final P in);
 
   protected P transfer(final GrammarGraphNode<?, ?> node, final P in) {
-    if (node instanceof AlternativeNode) {
-      return transfer((AlternativeNode) node, in);
+    if (node instanceof Choice) {
+      return transfer((Choice) node, in);
     } else {
-      assert (node instanceof SequenceNode);
-      return transfer((SequenceNode) node, in);
+      assert (node instanceof Sequence);
+      return transfer((Sequence) node, in);
     }
   }
 
-  protected abstract P confluence(final AlternativeNode node,
+  protected abstract P confluence(final Choice node,
       final Iterable<Pair<GrammarGraphEdge<?, ?>, P>> inSets);
 
-  protected abstract P confluence(final SequenceNode node,
+  protected abstract P confluence(final Sequence node,
       final Iterable<Pair<GrammarGraphEdge<?, ?>, P>> inSets);
 
   protected P confluence(final GrammarGraphNode<?, ?> node,
       final Iterable<Pair<GrammarGraphEdge<?, ?>, P>> inSets) {
-    if (node instanceof AlternativeNode) {
-      return confluence((AlternativeNode) node, inSets);
+    if (node instanceof Choice) {
+      return confluence((Choice) node, inSets);
     } else {
-      assert (node instanceof SequenceNode);
-      return confluence((SequenceNode) node, inSets);
+      assert (node instanceof Sequence);
+      return confluence((Sequence) node, inSets);
     }
   }
 
@@ -131,10 +131,10 @@ public abstract class PropertyComputation<P> {
 
   protected final Map<Symbol<?>, P> filter(final Map<GrammarGraphNode<?, ?>, P> result) {
     return result.entrySet().stream()
-        .filter(e -> (e.getKey() instanceof AlternativeNode)
-            && ((AlternativeNode) e.getKey()).hasGrammarSymbol())
+        .filter(e -> (e.getKey() instanceof Choice)
+            && ((Choice) e.getKey()).hasGrammarSymbol())
         .collect(Collectors.toMap(
-            e -> ((AlternativeNode) e.getKey()).getGrammarSymbol(), Map.Entry::getValue));
+            e -> ((Choice) e.getKey()).getGrammarSymbol(), Map.Entry::getValue));
   }
 
   public final Map<GrammarGraphNode<?, ?>, P> compute(final GrammarGraph grammarGraph) {

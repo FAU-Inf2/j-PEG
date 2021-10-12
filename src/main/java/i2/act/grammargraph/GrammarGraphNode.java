@@ -1,7 +1,7 @@
 package i2.act.grammargraph;
 
-import i2.act.grammargraph.GrammarGraphEdge.AlternativeEdge;
-import i2.act.grammargraph.GrammarGraphEdge.SequenceEdge;
+import i2.act.grammargraph.GrammarGraphEdge.Alternative;
+import i2.act.grammargraph.GrammarGraphEdge.Element;
 import i2.act.peg.symbols.Symbol;
 
 import java.util.ArrayList;
@@ -51,16 +51,15 @@ public abstract class GrammarGraphNode
 
   // ===============================================================================================
 
-  public static final class AlternativeNode
-      extends GrammarGraphNode<AlternativeEdge, SequenceEdge> {
+  public static final class Choice extends GrammarGraphNode<Alternative, Element> {
 
     private final Symbol<?> grammarSymbol;
 
-    public AlternativeNode() {
+    public Choice() {
       this(null);
     }
 
-    public AlternativeNode(final Symbol<?> grammarSymbol) {
+    public Choice(final Symbol<?> grammarSymbol) {
       this.grammarSymbol = grammarSymbol;
     }
 
@@ -74,8 +73,7 @@ public abstract class GrammarGraphNode
 
   }
 
-  public static final class SequenceNode
-      extends GrammarGraphNode<SequenceEdge, AlternativeEdge> {
+  public static final class Sequence extends GrammarGraphNode<Element, Alternative> {
 
   }
 

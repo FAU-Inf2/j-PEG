@@ -3,7 +3,7 @@ package i2.act.peg.transformations;
 import i2.act.grammargraph.GrammarGraph;
 import i2.act.grammargraph.GrammarGraphEdge;
 import i2.act.grammargraph.GrammarGraphNode;
-import i2.act.grammargraph.GrammarGraphNode.AlternativeNode;
+import i2.act.grammargraph.GrammarGraphNode.Choice;
 import i2.act.peg.ast.*;
 import i2.act.peg.ast.visitors.BaseASTVisitor;
 import i2.act.peg.ast.visitors.NameAnalysis;
@@ -69,9 +69,9 @@ public final class RemoveDeadProductions implements GrammarTransformation {
 
   private final void reachableProductions(final GrammarGraphNode<?, ?> node,
       final Set<GrammarGraphNode> visitedNodes, final Set<ParserSymbol> reachableProductions) {
-    if (node instanceof AlternativeNode) {
-      if (((AlternativeNode) node).getGrammarSymbol() instanceof ParserSymbol) {
-        reachableProductions.add((ParserSymbol) ((AlternativeNode) node).getGrammarSymbol());
+    if (node instanceof Choice) {
+      if (((Choice) node).getGrammarSymbol() instanceof ParserSymbol) {
+        reachableProductions.add((ParserSymbol) ((Choice) node).getGrammarSymbol());
       }
     }
 
@@ -79,7 +79,7 @@ public final class RemoveDeadProductions implements GrammarTransformation {
 
     for (final GrammarGraphEdge<?, ?> successorEdge : node.getSuccessorEdges()) {
       final GrammarGraphNode<?, ?> targetNode = successorEdge.getTarget();
-      
+
       if (!visitedNodes.contains(targetNode)) {
         reachableProductions(targetNode, visitedNodes, reachableProductions);
       }
