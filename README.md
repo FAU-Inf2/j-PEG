@@ -275,15 +275,15 @@ Some applications might need to further analyze a given PEG and *j-PEG* comes wi
 such analyses.
 
 A given PEG induces a bi-partite graph, which *j-PEG* refers to as *grammar graph* and which it
-represents as an instance of the class `i2.act.grammargraph.GrammarGraph`. The nodes of such a
-grammar graph are either *alternative nodes* (which represent choices in the grammar; this includes
-all terminals and non-terminals of the grammar) or *sequence nodes* (which, as the name implies,
-represent sequences in the grammar). The edges from alternative nodes to sequence nodes are called
-*alternative edges* and the edges from sequence nodes to alternatives nodes are called *sequence
-edges* (such sequence edges are annotated with the respective quantifier from the grammar, if any).
+represents as an instance of the class `i2.act.grammargraph.GrammarGraph`. Each nodes of such a
+grammar graph is either a `Choice` (this includes all terminals and non-terminals of the grammar) or
+a `Sequence` (which, as the name implies, represent sequences in the grammar). The edges from a
+`Choice` to a `Sequence` are called `Alternative`s and the edges from a `Sequence` to a `Choice` are
+called `Element`s (such `Element`s are annotated with the respective quantifier from the grammar, if
+any).
 
-For the example PEG from above, the grammar graph looks as follows (rectangular nodes are
-alternative nodes and circular nodes are sequence nodes):
+For the example PEG from above, the grammar graph looks as follows (rectangular nodes are `Choice`s
+and circular nodes are `Sequence`s):
 
 ![grammar graph](graphics/grammar_graph.png)
 
