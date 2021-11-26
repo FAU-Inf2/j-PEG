@@ -8,6 +8,7 @@ import i2.act.packrat.cst.Node;
 import i2.act.packrat.cst.NonTerminalNode;
 import i2.act.packrat.cst.TerminalNode;
 import i2.act.packrat.cst.visitors.DotGenerator;
+import i2.act.packrat.cst.visitors.LaTeXGenerator;
 import i2.act.packrat.cst.visitors.PrettyPrinter;
 import i2.act.packrat.cst.visitors.SyntaxTreeVisitor;
 import i2.act.peg.ast.Grammar;
@@ -35,6 +36,7 @@ public final class PEGMain {
 
   private static final String OPTION_PRETTY_PRINT_IN = "--prettyPrintIn";
   private static final String OPTION_TO_DOT = "--toDot";
+  private static final String OPTION_TO_LATEX = "--toLaTeX";
   private static final String OPTION_PRINT_GRAMMAR_GRAPH = "--printGG";
 
   private static final String OPTION_TREE_STATS = "--treeStats";
@@ -55,6 +57,7 @@ public final class PEGMain {
 
     argumentsParser.addOption(OPTION_PRETTY_PRINT_IN, false);
     argumentsParser.addOption(OPTION_TO_DOT, false);
+    argumentsParser.addOption(OPTION_TO_LATEX, false);
     argumentsParser.addOption(OPTION_PRINT_GRAMMAR_GRAPH, false);
 
     argumentsParser.addOption(OPTION_TREE_STATS, false);
@@ -163,6 +166,10 @@ public final class PEGMain {
         }
 
         DotGenerator.print(syntaxTree, style);
+      }
+
+      if (arguments.hasOption(OPTION_TO_LATEX)) {
+        LaTeXGenerator.print(syntaxTree);
       }
 
       if (arguments.hasOption(OPTION_TREE_STATS)) {
