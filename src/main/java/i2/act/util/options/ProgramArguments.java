@@ -1,13 +1,30 @@
 package i2.act.util.options;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public final class ProgramArguments {
 
+  private final List<String> positionalArguments;
   private final LinkedHashMap<String, String> options;
 
   public ProgramArguments() {
+    this.positionalArguments = new ArrayList<String>();
     this.options = new LinkedHashMap<String, String>();
+  }
+
+  public final boolean hasPositionalArguments() {
+    return !this.positionalArguments.isEmpty();
+  }
+
+  public final int numberOfPositionalArguments() {
+    return this.positionalArguments.size();
+  }
+
+  public final List<String> getPositionalArguments() {
+    return Collections.unmodifiableList(this.positionalArguments);
   }
 
   public final boolean hasOption(final String option) {
@@ -97,4 +114,9 @@ public final class ProgramArguments {
   final void addOption(final String option, final String value) {
     this.options.put(option, value);
   }
+
+  final void addPositionalArgument(final String positionalArgument) {
+    this.positionalArguments.add(positionalArgument);
+  }
+
 }

@@ -4,10 +4,21 @@ import java.util.LinkedHashMap;
 
 public final class ProgramArgumentsParser {
 
+  private final String positionalArgumentsName;
+
   private final LinkedHashMap<String, ProgramOption> allowedOptions;
 
   public ProgramArgumentsParser() {
+    this(null);
+  }
+
+  public ProgramArgumentsParser(final String positionalArgumentsName) {
+    this.positionalArgumentsName = positionalArgumentsName;
     this.allowedOptions = new LinkedHashMap<String, ProgramOption>();
+  }
+
+  private final boolean allowPositionalArguments() {
+    return this.positionalArgumentsName != null;
   }
 
   private final void addOption(final ProgramOption option) {
@@ -62,6 +73,15 @@ public final class ProgramArgumentsParser {
       ++index;
     }
 
+    if (allowPositionalArguments()) {
+      if (numberOfAllowedOptions > 0) {
+        builder.append('\n');
+      }
+
+      builder.append(indentation);
+      builder.append(this.positionalArgumentsName);
+    }
+
     return builder.toString();
   }
 
@@ -78,31 +98,49 @@ public final class ProgramArgumentsParser {
     final ProgramArguments programArguments = new ProgramArguments();
 
     int idx = 0;
+    boolean reachedPositionalArgumentSeparator = false;
+
     while (idx < args.length) {
       final String optionKey = args[idx];
 
-      if (!this.allowedOptions.containsKey(optionKey)) {
-        throw new InvalidProgramArgumentsException(
-          String.format("invalid option '%s'", optionKey));
-      }
-
-      final ProgramOption option = this.allowedOptions.get(optionKey);
-
-      if (option.takesArgument) {
-        if (idx == args.length - 1) {
-          throw new InvalidProgramArgumentsException(
-            String.format("missing value for option '%s'", optionKey));
-        }
-
-        final String argument = args[idx + 1];
-
-        programArguments.addOption(optionKey, argument);
-
-        idx += 2;
-      } else {
-        programArguments.addOption(optionKey);
+      if (allowPositionalArguments()
+          && !reachedPositionalArgumentSeparator
+          && "--".equals(optionKey)) {
+        reachedPositionalArgumentSeparator = true;
 
         idx += 1;
+        continue;
+      }
+
+      if (this.allowedOptions.containsKey(optionKey)) {
+        final ProgramOption option = this.allowedOptions.get(optionKey);
+
+        if (option.takesArgument) {
+          if (idx == args.length - 1) {
+            throw new InvalidProgramArgumentsException(
+              String.format("missing value for option '%s'", optionKey));
+          }
+
+          final String argument = args[idx + 1];
+
+          programArguments.addOption(optionKey, argument);
+
+          idx += 2;
+        } else {
+          programArguments.addOption(optionKey);
+
+          idx += 1;
+        }
+      } else {
+        if (allowPositionalArguments()
+            && (reachedPositionalArgumentSeparator || !optionKey.startsWith("-"))) {
+          programArguments.addPositionalArgument(optionKey);
+
+          idx += 1;
+        } else {
+          throw new InvalidProgramArgumentsException(
+            String.format("invalid option '%s'", optionKey));
+        }
       }
     }
 
